@@ -58,12 +58,9 @@ describe('PostDetail Component', () => {
   });
 
   it('handles empty comments', async () => {
+    const mockPostNoComments = { ...mockPost, kids: undefined };
     (fetch as jest.Mock).mockResolvedValueOnce({
-      json: async () => mockPost,
-      ok: true,
-    });
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      json: async () => [],
+      json: async () => mockPostNoComments,
       ok: true,
     });
 

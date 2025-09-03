@@ -140,4 +140,21 @@ jest.mock('lucide-react-native', () => ({
 }));
 
 // Mock global fetch
-global.fetch = jest.fn();
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({}),
+  })
+);
+
+// Suppress React key prop warnings in tests (these are often false positives in test environments)
+const originalError = console.error;
+console.error = (...args) => {
+  if (
+    typeof args[0] === 'string' &&
+    args[0].includes('Warning: Each child in a list should have a unique "key" prop')
+  ) {
+    return;
+  }
+  originalError.call(console, ...args);
+};

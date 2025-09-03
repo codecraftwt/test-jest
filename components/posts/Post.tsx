@@ -31,8 +31,9 @@ export const Post = ({ id, title, url, score, text, kids }: Item) => {
   };
 
   return (
-    <View style={{ gap: 12 }}>
+    <View style={{ gap: 12 }} accessibilityLabel={`Post by ${title}`}>
       <Pressable
+        accessibilityRole="button"
         onPress={async () => {
           if (isExternal) Linking.openURL(url);
           else await navigateToDetails();
@@ -45,6 +46,7 @@ export const Post = ({ id, title, url, score, text, kids }: Item) => {
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <Pressable
           style={StyleSheet.compose(styles.baseButton, styles.button)}
+          accessibilityRole="button"
           onPress={async () => {
             await Haptics.notificationAsync(
               Haptics.NotificationFeedbackType.Success
@@ -65,6 +67,7 @@ export const Post = ({ id, title, url, score, text, kids }: Item) => {
         </Pressable>
         <Pressable
           style={StyleSheet.compose(styles.baseButton, styles.button)}
+          accessibilityRole="button"
           onPress={async () => {
             await navigateToDetails();
           }}
@@ -85,6 +88,7 @@ export const Post = ({ id, title, url, score, text, kids }: Item) => {
         {url && (
           <Pressable
             style={StyleSheet.compose(styles.baseButton, styles.link)}
+            accessibilityRole="button"
             onPress={() => {
               Linking.openURL(url);
             }}

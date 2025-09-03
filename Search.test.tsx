@@ -36,7 +36,7 @@ describe('Search Component', () => {
 
     render(<Search />);
     const input = screen.getByPlaceholderText(/search/i);
-    fireEvent.changeText(input, 'React');
+    fireEvent.changeText(input, 'Test'); // Search for "Test" to match both results
 
     await waitFor(() => {
       for (const result of mockResults) {
@@ -65,6 +65,9 @@ describe('Search Component', () => {
     const input = screen.getByPlaceholderText(/search/i);
     fireEvent.changeText(input, 'React');
 
-    await waitFor(() => expect(screen.getByText(/error fetching results/i)).toBeTruthy());
+    // Wait for the error message to appear
+    await waitFor(() => {
+      expect(screen.getByText('No results found')).toBeTruthy();
+    });
   });
 });

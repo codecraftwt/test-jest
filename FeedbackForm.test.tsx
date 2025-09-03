@@ -31,11 +31,15 @@ describe('FeedbackForm Component', () => {
   it('saves feedback to AsyncStorage on submit', async () => {
     render(<FeedbackForm />);
 
-    const starInput = screen.getByTestId('star-rating');
+    // Click the 5th star button to set rating to 5
+    // Find the star buttons by looking for the star text
+    const starButtons = screen.getAllByText('★');
+    const fifthStar = starButtons[4]; // 5th star (0-indexed)
+    fireEvent.press(fifthStar);
+
     const commentInput = screen.getByPlaceholderText(/write a comment/i);
     const submitBtn = screen.getByText(/submit/i);
 
-    fireEvent(starInput, 'change', { nativeEvent: { value: 5 } });
     fireEvent.changeText(commentInput, 'Great app!');
     fireEvent.press(submitBtn);
 
@@ -64,8 +68,13 @@ describe('FeedbackForm Component', () => {
     (AsyncStorage.setItem as jest.Mock).mockRejectedValueOnce(new Error('Storage error'));
 
     render(<FeedbackForm />);
-    const starInput = screen.getByTestId('star-rating');
-    fireEvent(starInput, 'change', { nativeEvent: { value: 5 } });
+    
+    // Click the 5th star button to set rating to 5
+    // Find the star buttons by looking for the star text
+    const starButtons = screen.getAllByText('★');
+    const fifthStar = starButtons[4]; // 5th star (0-indexed)
+    fireEvent.press(fifthStar);
+    
     const submitBtn = screen.getByText(/submit/i);
     fireEvent.press(submitBtn);
 

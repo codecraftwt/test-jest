@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { FlatList, ListRenderItem, View } from "react-native";
+import { useMemo, useState } from "react";
+import { FlatList, ListRenderItem, View, Text } from "react-native";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 import { Post } from "@/components/posts/Post";
@@ -26,14 +26,21 @@ const ItemSeparatorComponent = () => (
 );
 
 export const Posts = ({ storyType }: { storyType: StoryType }) => {
+  const [error, setError] = useState<string | null>(null);
+
   const storyListQuery = useQuery({
     queryKey: ["storyIds", storyType],
     queryFn: async () => {
-      const getItemIds = MAP_STORY_TYPE_TO_STORY_ENDPOINTS[storyType];
-      const res = await getItemIds();
-      const topStories = await res.json();
-
-      return topStories;
+      try {
+        const getItemIds = MAP_STORY_TYPE_TO_STORY_ENDPOINTS[storyType];
+        const res = await getItemIds();
+        const topStories = await res.json();
+        setError(null);
+        return topStories;
+      } catch (err) {
+        setError("Error loading posts");
+        throw err;
+      }
     },
   });
 
@@ -66,13 +73,34 @@ export const Posts = ({ storyType }: { storyType: StoryType }) => {
   });
 
   const posts = useMemo(() => {
-    return data?.pages
-      .flat()
-      .filter(({ dead, deleted }) => dead !== true && deleted !== true);
+    if (!data?.pages) return [];
+    const flattened = data.pages.flat();
+    const filtered = flattened.filter(({ dead, deleted }) => dead !== true && deleted !== true);
+    return filtered;
   }, [data]);
+
+  // Handle error state
+  if (error) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>{error}</Text>
+      </View>
+    );
+  }
+
+  // Handle no posts state
+  if (posts && posts.length === 0) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>No posts available</Text>
+      </View>
+    );
+  }
 
   return (
     <FlatList
+      testID="post-flatlist"
+      accessibilityRole="list"
       indicatorStyle="black"
       keyExtractor={(item) => item.id.toString()}
       data={posts}

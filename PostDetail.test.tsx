@@ -12,6 +12,7 @@ const mockPost = {
   title: 'Post 1',
   by: 'user1',
   content: 'This is **bold** content\n> blockquote',
+  kids: [1, 2], // Comment IDs
 };
 
 const mockComments = [
@@ -41,10 +42,13 @@ describe('PostDetail Component', () => {
       json: async () => mockPost,
       ok: true,
     });
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      json: async () => mockComments,
-      ok: true,
-    });
+    // Mock individual comment requests
+    for (const comment of mockComments) {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        json: async () => comment,
+        ok: true,
+      });
+    }
 
     render(<PostDetail postId={1} />);
 
@@ -68,20 +72,34 @@ describe('PostDetail Component', () => {
   });
 
   it('handles refresh comments', async () => {
-    const refreshMock = jest.fn();
     (fetch as jest.Mock).mockResolvedValueOnce({
       json: async () => mockPost,
       ok: true,
     });
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      json: async () => mockComments,
-      ok: true,
-    });
+    // Mock individual comment requests for initial load
+    for (const comment of mockComments) {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        json: async () => comment,
+        ok: true,
+      });
+    }
+    // Mock individual comment requests for refresh
+    for (const comment of mockComments) {
+      (fetch as jest.Mock).mockResolvedValueOnce({
+        json: async () => comment,
+        ok: true,
+      });
+    }
 
     const { getByTestId } = render(<PostDetail postId={1} />);
-    const refreshButton = getByTestId('refresh-comments'); // add testID in component
-
+    
+    // Wait for the component to load and show the refresh button
+    await waitFor(() => expect(getByTestId('refresh-comments')).toBeTruthy());
+    
+    const refreshButton = getByTestId('refresh-comments');
     fireEvent.press(refreshButton);
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(3)); // initial + comments + refresh
+    
+    // Should have called fetch for initial post + initial comments + refresh comments
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(5)); // 1 + 2 + 2
   });
 });
